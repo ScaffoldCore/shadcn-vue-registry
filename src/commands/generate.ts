@@ -1,3 +1,4 @@
+import type { IDependencies } from '#/dependencies'
 import fs from 'node:fs'
 import path, { resolve, sep } from 'node:path'
 import { globSync } from 'glob'
@@ -5,7 +6,7 @@ import { globSync } from 'glob'
 // Valid extensions
 const VALID_EXTENSIONS = ['vue', 'js', 'jsx', 'ts', 'tsx'].join(',')
 
-function getDependencies(dir: string, compiledDependencies: string[], compiledDevDependencies: string[]) {
+function getDependencies(dir: string, compiledDependencies: string[], compiledDevDependencies: string[]): IDependencies {
     const files = globSync(`**/*.{${VALID_EXTENSIONS}}`, {
         cwd: dir,
         absolute: true,
@@ -67,10 +68,10 @@ function getDependencies(dir: string, compiledDependencies: string[], compiledDe
     }
 }
 
-export async function generateRegistry(cwd: string, output: string) {
+export async function generateRegistry(cwd: string, output: string): Promise<void> {
     const rootCwd = resolve(process.cwd(), `./../../${cwd}`)
     const absoluteCwd = path.resolve(process.cwd(), cwd)
-    const absoluteOutput = path.resolve(process.cwd(), output)
+    // const absoluteOutput = path.resolve(process.cwd(), output)
 
     console.log(`Scanning directory: ${absoluteCwd}`)
 
