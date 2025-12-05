@@ -1,0 +1,10 @@
+{
+    "name": "test-workspace",
+    "dependencies": {
+        "vue": "^3.0.0",
+        "clsx": "^1.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0"
+    }
+}
