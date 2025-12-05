@@ -6,9 +6,9 @@
     "description": "一个关于 shadcn-vue 版本的 registry.json 文件生成",
     "author": "lonewolfyx <olddrivero.king@qq.com>",
     "license": "MIT",
-    "homepage": "https://github.com/ScaffoldCore/{repo}",
+    "homepage": "https://github.com/ScaffoldCore/shadcn-vue-registry",
     "bugs": {
-        "url": "https://github.com/ScaffoldCore/{repo}/issues"
+        "url": "https://github.com/ScaffoldCore/shadcn-vue-registry/issues"
     },
     "keywords": [],
     "main": "dist/index.js",
