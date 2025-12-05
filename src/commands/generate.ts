@@ -2,6 +2,7 @@ import type { IDependencies } from '#/dependencies'
 import fs from 'node:fs'
 import path, { resolve, sep } from 'node:path'
 import { globSync } from 'glob'
+import { getRegistryType } from '@/utils/types.ts'
 
 // Valid extensions
 const VALID_EXTENSIONS = ['vue', 'js', 'jsx', 'ts', 'tsx'].join(',')
@@ -96,11 +97,8 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
         }
     }
 
-    // 1. Glob scan
-    // Construct glob pattern: **/*.{vue,js,jsx,ts,tsx}
-    const pattern = `**/*.{${VALID_EXTENSIONS}}`
-
-    const dirs = globSync(pattern, {
+    // Construct glob pattern: */*/*.{vue,js,jsx,ts,tsx}
+    const dirs = globSync(`*/*/*.{${VALID_EXTENSIONS}}`, {
         cwd: absoluteCwd,
         absolute: true,
         ignore: ['**/node_modules/**', '**/dist/**'],
@@ -108,13 +106,13 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
 
     // 2. Deduplicate
     const uniqueDirs = [...new Set(dirs)]
-    console.log(uniqueDirs)
+    // console.log(uniqueDirs)
 
     // 3. Print Unique Directories
     for (const dir of uniqueDirs) {
         // 1. Get all files under current directory using globSync
         // Scan for valid extensions in the current directory only to avoid duplication
-        const files = globSync(`*.{${VALID_EXTENSIONS}}`, {
+        const files = globSync(`**/*.{${VALID_EXTENSIONS}}`, {
             cwd: dir,
             absolute: true,
         })
@@ -126,35 +124,49 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
         const category = relativeDir.split(sep).shift() as string
         const name = relativeDir.split(sep).pop()!
 
-        // 4. Get type
-        const typeMap: Record<string, string> = {
-            lib: 'registry:lib',
-            block: 'registry:block',
-            blocks: 'registry:block',
-            component: 'registry:component',
-            ui: 'registry:ui',
-            hook: 'registry:hook',
-            composable: 'registry:composable',
-            page: 'registry:page',
-            file: 'registry:file',
-            theme: 'registry:theme',
-            style: 'registry:style',
-            item: 'registry:item',
-        }
+        const type: string = getRegistryType(relativeDir)
 
-        const type: string = typeMap[category] ?? `registry:${category}`
+        // console.log(`Type: ${type}`)
+        //
+        // console.log(`Directory: ${relativeDir}, Category: ${category}`)
+        // console.log(`Files:`, files.map(f => path.relative(dir, f)))
 
-        console.log(`Type: ${type}`)
-
-        console.log(`Directory: ${relativeDir}, Category: ${category}`)
-        console.log(`Files:`, files.map(f => path.relative(dir, f)))
-
-        console.log(`items:`, {
+        const items = {
             name,
             type,
-            dependencies: getDependencies(dir, dependencies, devDependencies),
-            items: [],
-        })
+            items: files.map((file) => {
+                const relativeFile = path.relative(dir, file)
+                const relativeFilePath = path.join(relativeDir, relativeFile)
+                return {
+                    path: relativeFilePath,
+                    type: getRegistryType(relativeFilePath),
+                }
+            }),
+        }
+        const pkgDependencies = getDependencies(dir, dependencies, devDependencies)
+        if (pkgDependencies.dependencies.length) {
+            Object.assign(items, {
+                dependencies: pkgDependencies.dependencies,
+            })
+        }
+        if (pkgDependencies.devDependencies.length) {
+            Object.assign(items, {
+                dependencies: pkgDependencies.devDependencies,
+            })
+        }
+        if (pkgDependencies.registryDependencies.length) {
+            Object.assign(items, {
+                dependencies: pkgDependencies.registryDependencies,
+            })
+        }
+        // console.log(`items:`, {
+        //     name,
+        //     type,
+        //     dependencies: getDependencies(dir, dependencies, devDependencies),
+        //     items: [],
+        // })
+
+        console.log(items)
 
         // console.log(`Dependencies: `, getDependencies(dir));
     }

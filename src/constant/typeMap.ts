@@ -1,0 +1,18 @@
+export const typeMap: Record<string, string> = {
+    lib: 'registry:lib',
+    block: 'registry:block',
+    blocks: 'registry:block',
+    component: 'registry:component',
+    components: 'registry:component',
+    ui: 'registry:ui',
+    hook: 'registry:hook',
+    composable: 'registry:composable',
+    composables: 'registry:composable',
+    page: 'registry:page',
+    pages: 'registry:page',
+    file: 'registry:file',
+    files: 'registry:file',
+    theme: 'registry:theme',
+    style: 'registry:style',
+    item: 'registry:item',
+}
