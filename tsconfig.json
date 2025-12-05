@@ -4,7 +4,11 @@
         "baseUrl": "./",
         "paths": {
             "@/*": [
-                "./*"
+                "./src/*"
+            ],
+            "#/*": [
+                "./src/types/*",
+                "./types/*"
             ]
         },
         "resolveJsonModule": true
