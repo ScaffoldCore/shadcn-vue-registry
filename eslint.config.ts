@@ -15,6 +15,7 @@ const config = antfu({
         'ts/explicit-function-return-type': 'off',
         'vue/block-order': 'off',
         'vue/valid-template-root': 'off',
+        'unused-imports/no-unused-vars': 'off',
     },
 }, {
     files: ['**/*.yml', '**/*.yaml'],
