@@ -12,6 +12,7 @@
             ]
         },
         "resolveJsonModule": true,
-        "noUnusedLocals": false
+        "noUnusedLocals": false,
+        "noUnusedParameters": false
     }
 }
