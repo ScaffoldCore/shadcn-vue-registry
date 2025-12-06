@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import { writeFile } from 'node:fs/promises'
-import path, { join, resolve, sep } from 'node:path'
+import { dirname, join, relative, resolve, sep } from 'node:path'
 import { blue, red } from 'ansis'
 import { globSync } from 'glob'
 import { VALID_EXTENSIONS } from '@/constant/comman.ts'
@@ -30,8 +30,8 @@ import { getRegistryType } from '@/utils/types.ts'
  */
 export async function generateRegistry(cwd: string, output: string): Promise<void> {
     const rootCwd = resolve(process.cwd(), `./../../${cwd}`)
-    const absoluteCwd = path.resolve(process.cwd(), cwd)
-    const absoluteOutput = path.resolve(process.cwd(), output)
+    const absoluteCwd = resolve(process.cwd(), cwd)
+    const absoluteOutput = resolve(process.cwd(), output)
     const registryJsonPath = join(absoluteOutput, 'registry.json')
 
     console.log(blue('🔍 Scanning project for components...'))
@@ -42,7 +42,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
     }
 
     // Read package.json to extract project dependencies
-    const packageJsonPath = path.join(rootCwd, 'package.json')
+    const packageJsonPath = join(rootCwd, 'package.json')
 
     let dependencies: string[] = []
     let devDependencies: string[] = []
@@ -64,7 +64,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
         cwd: absoluteCwd,
         absolute: true,
         ignore: ['**/node_modules/**', '**/dist/**'],
-    }).map(file => path.dirname(file))
+    }).map(file => dirname(file))
 
     // Remove duplicate directories to avoid processing the same component multiple times
     const uniqueDirs = Array.from(new Set(dirs))
@@ -84,7 +84,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
         })
 
         // Calculate relative path from the scanned directory to current component
-        const relativeDir = path.relative(absoluteCwd, dir)
+        const relativeDir = relative(absoluteCwd, dir)
 
         // Extract component metadata from directory structure
         // Category: first segment (e.g., 'ui', 'forms', 'layout')
@@ -98,15 +98,15 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
         // console.log(`Type: ${type}`)
         //
         // console.log(`Directory: ${relativeDir}, Category: ${category}`)
-        // console.log(`Files:`, files.map(f => path.relative(dir, f)))
+        // console.log(`Files:`, files.map(f => relative(dir, f)))
 
         // Build the registry item structure
         const items = {
             name,
             type,
             items: files.map((file) => {
-                const relativeFile = path.relative(dir, file)
-                const relativeFilePath = path.join(relativeDir, relativeFile)
+                const relativeFile = relative(dir, file)
+                const relativeFilePath = join(relativeDir, relativeFile)
                 return {
                     path: relativeFilePath,
                     type: getRegistryType(relativeFilePath),
