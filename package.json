@@ -3,7 +3,7 @@
     "type": "module",
     "version": "0.0.0.beta",
     "private": true,
-    "description": "一个关于 shadcn-vue 版本的 registry.json 文件生成",
+    "description": "A powerful CLI tool for automatically generating registry.json files for shadcn-vue component libraries",
     "author": "lonewolfyx <olddrivero.king@qq.com>",
     "license": "MIT",
     "homepage": "https://github.com/ScaffoldCore/shadcn-vue-registry",
