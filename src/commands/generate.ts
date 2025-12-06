@@ -1,5 +1,6 @@
 import fs from 'node:fs'
-import path, { resolve, sep } from 'node:path'
+import { writeFile } from 'node:fs/promises'
+import path, { join, resolve, sep } from 'node:path'
 import { blue, red } from 'ansis'
 import { globSync } from 'glob'
 import { VALID_EXTENSIONS } from '@/constant/comman.ts'
@@ -30,7 +31,8 @@ import { getRegistryType } from '@/utils/types.ts'
 export async function generateRegistry(cwd: string, output: string): Promise<void> {
     const rootCwd = resolve(process.cwd(), `./../../${cwd}`)
     const absoluteCwd = path.resolve(process.cwd(), cwd)
-    // const absoluteOutput = path.resolve(process.cwd(), output)
+    const absoluteOutput = path.resolve(process.cwd(), output)
+    const registryJsonPath = join(absoluteOutput, 'registry.json')
 
     console.log(blue('🔍 Scanning project for components...'))
     console.log(`Scanning directory: ${absoluteCwd}`)
@@ -71,6 +73,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
         blue(`Found ${red(uniqueDirs.length)} components in ${absoluteCwd}`),
     )
 
+    const registryItems = []
     // Process each unique component directory
     for (const dir of uniqueDirs) {
         // Scan for all valid files in the current component directory
@@ -135,8 +138,27 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
             })
         }
 
-        console.log(items)
-
+        registryItems.push(items)
         // console.log(`Dependencies: `, getDependencies(dir));
     }
+
+    const registryData = {
+        $schema: 'https://shadcn-vue.com/schema/registry.json',
+        name: 'lonewolfyx',
+        homepage: 'https://github.com/lonewolfyx',
+        items: registryItems,
+    }
+
+    const registryJson = JSON.stringify(registryData, null, 2)
+
+    await writeFile(
+        registryJsonPath,
+        registryJson,
+        {
+            encoding: 'utf-8',
+            flag: 'w',
+        },
+    )
+
+    console.log('registry.json path:\n', registryJsonPath)
 }
