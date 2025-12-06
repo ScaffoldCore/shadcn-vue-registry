@@ -30,8 +30,10 @@
         "access": "public"
     },
     "dependencies": {
+        "ansis": "^4.2.0",
         "cac": "^6.7.14",
-        "glob": "^13.0.0"
+        "glob": "^13.0.0",
+        "ora": "^9.0.0"
     },
     "devDependencies": {
         "@antfu/eslint-config": "^6.4.2",

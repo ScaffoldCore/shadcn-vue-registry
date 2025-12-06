@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path, { resolve, sep } from 'node:path'
+import { blue, red } from 'ansis'
 import { globSync } from 'glob'
 import { VALID_EXTENSIONS } from '@/constant/comman.ts'
 import { getDependencies } from '@/utils/dependencies.ts'
@@ -31,6 +32,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
     const absoluteCwd = path.resolve(process.cwd(), cwd)
     // const absoluteOutput = path.resolve(process.cwd(), output)
 
+    console.log(blue('🔍 Scanning project for components...'))
     console.log(`Scanning directory: ${absoluteCwd}`)
 
     if (!fs.existsSync(absoluteCwd)) {
@@ -65,6 +67,9 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
     // Remove duplicate directories to avoid processing the same component multiple times
     const uniqueDirs = Array.from(new Set(dirs))
     // console.log(uniqueDirs)
+    console.log(
+        blue(`Found ${red(uniqueDirs.length)} components in ${absoluteCwd}`),
+    )
 
     // Process each unique component directory
     for (const dir of uniqueDirs) {
