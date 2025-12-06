@@ -105,7 +105,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
     }).map(file => path.dirname(file))
 
     // 2. Deduplicate
-    const uniqueDirs = [...new Set(dirs)]
+    const uniqueDirs = Array.from(new Set(dirs))
     // console.log(uniqueDirs)
 
     // 3. Print Unique Directories
