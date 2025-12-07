@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import { writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { blue, red } from 'ansis'
 import { globSync } from 'glob'
@@ -20,7 +20,7 @@ import { getRegistryType } from '@/utils/types.ts'
  * @param output - Output directory path where the registry.json will be generated
  * @returns Promise that resolves when registry generation is complete
  *
- * @throws {Error} When the specified directory doesn't exist
+ * @throws {Error} When the specified directory doesn't existe
  *
  * @example
  * ```typescript
@@ -49,7 +49,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
 
     if (fs.existsSync(packageJsonPath)) {
         try {
-            const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
+            const pkg = JSON.parse(await readFile(packageJsonPath, 'utf-8'))
             dependencies = Object.keys(pkg.dependencies || {})
             devDependencies = Object.keys(pkg.devDependencies || {})
         }
