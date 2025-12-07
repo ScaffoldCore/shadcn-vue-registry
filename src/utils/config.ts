@@ -4,7 +4,7 @@
 
 import type { Jiti } from 'jiti'
 import type { RegistryConfig } from '@/types'
-import { resolve } from 'node:path'
+import { isAbsolute, resolve } from 'node:path'
 import * as process from 'node:process'
 import defu from 'defu'
 import { findUp } from 'find-up'
@@ -37,4 +37,18 @@ export const loadConfig = async (): Promise<RegistryConfig> => {
     })
 
     return defu(resolveConfig, defaultConfig)
+}
+
+export const resolveConfig = (config: RegistryConfig, options: { cwd: string, output: string }) => {
+    const root = isAbsolute(config.root)
+        ? config.root
+        : resolve(process.cwd(), config.root)
+
+    const { cwd, output, ...resolveConfig } = defu(options, config)
+
+    return {
+        ...resolveConfig,
+        cwd: cwd === '.' ? process.cwd() : isAbsolute(cwd) ? cwd : resolve(root, cwd),
+        output: output === '.' ? process.cwd() : isAbsolute(output) ? output : resolve(root, output),
+    }
 }
