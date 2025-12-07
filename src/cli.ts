@@ -34,7 +34,7 @@ cli
         try {
             const configPath = path.resolve(process.cwd(), 'registry.config.ts')
 
-            const spinner = ora('Initializing registry configuration\n\n').start()
+            const spinner = ora('Initializing registry configuration\n').start()
 
             // Create the configuration file content
             const configContent = `/**
@@ -59,7 +59,7 @@ export default defineConfig({
                 flag: 'w',
             })
 
-            console.log('\n\n')
+            console.log('\n')
             spinner.succeed('🎉 Registry configuration initialized successfully')
             console.log('\n📝 Configuration file created:', configPath)
             console.log('\n📋 Next steps:')
