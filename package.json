@@ -10,9 +10,9 @@
         "url": "https://github.com/ScaffoldCore/shadcn-vue-registry/issues"
     },
     "keywords": [],
-    "main": "dist/index.js",
+    "main": "dist/index.mjs",
     "module": "dist/index.mjs",
-    "types": "dist/index.d.ts",
+    "types": "dist/index.d.mts",
     "bin": {
         "svr": "./src/bin/index.js",
         "shadcn-vue-registry": "./src/bin/index.js"
