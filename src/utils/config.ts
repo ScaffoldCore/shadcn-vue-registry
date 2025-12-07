@@ -21,16 +21,20 @@ export const defineConfig = (config: RegistryConfig): RegistryConfig => {
     return config
 }
 
-export const loadConfig = async (): Promise<any> => {
+export const loadConfig = async (): Promise<RegistryConfig> => {
     const resolveConfigPath = await findUp(DEFAULT_CONFIG_FILES.map((filePath: string) => resolve(process.cwd(), filePath)))
 
     if (!resolveConfigPath) {
         throw new Error('No config file found')
     }
 
-    const loader: Jiti = createJiti(resolveConfigPath, {
+    const loader: Jiti = createJiti(process.cwd(), {
         extensions: ['.js', '.ts', '.mjs', '.cjs', '.mts', '.cts'],
     })
 
-    return defu(defaultConfig, loader.import(resolveConfigPath, { default: true }))
+    const resolveConfig: RegistryConfig = await loader.import(`${resolveConfigPath}?t=${Date.now()}`, {
+        default: true,
+    })
+
+    return defu(resolveConfig, defaultConfig)
 }
