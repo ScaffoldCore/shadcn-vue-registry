@@ -1,48 +1,25 @@
+import type { ResolveConfig } from '@/types'
 import fs from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
-import { dirname, join, relative, resolve, sep } from 'node:path'
+import { dirname, join, relative, sep } from 'node:path'
 import { blue, red } from 'ansis'
 import { globSync } from 'glob'
 import { VALID_EXTENSIONS } from '@/constant/comman.ts'
 import { getDependencies } from '@/utils/dependencies.ts'
 import { getRegistryType } from '@/utils/types.ts'
 
-/**
- * Generates a registry.json file by scanning the project structure and analyzing component dependencies.
- *
- * This function performs the following operations:
- * 1. Scans the specified directory for component files matching valid extensions
- * 2. Reads package.json to extract project dependencies
- * 3. Analyzes each component directory to determine file structure and dependencies
- * 4. Generates registry items with proper metadata and dependency information
- *
- * @param cwd - Current working directory to scan for components (relative to project root)
- * @param output - Output directory path where the registry.json will be generated
- * @returns Promise that resolves when registry generation is complete
- *
- * @throws {Error} When the specified directory doesn't existe
- *
- * @example
- * ```typescript
- * await generateRegistry('./components', './registry')
- * // This will scan the ./components directory and generate registry.json in ./registry
- * ```
- */
-export async function generateRegistry(cwd: string, output: string): Promise<void> {
-    const rootCwd = resolve(process.cwd(), `./../../${cwd}`)
-    const absoluteCwd = resolve(process.cwd(), cwd)
-    const absoluteOutput = resolve(process.cwd(), output)
-    const registryJsonPath = join(absoluteOutput, 'registry.json')
+export async function generateRegistry(config: ResolveConfig): Promise<void> {
+    const registryJsonPath = join(config.output, 'registry.json')
 
     console.log(blue('🔍 Scanning project for components...'))
-    console.log(`Scanning directory: ${absoluteCwd}`)
+    console.log(`Scanning directory: ${config.cwd}`)
 
-    if (!fs.existsSync(absoluteCwd)) {
-        throw new Error(`Directory not found: ${absoluteCwd}`)
+    if (!fs.existsSync(config.cwd)) {
+        throw new Error(`Directory not found: ${config.cwd}`)
     }
 
     // Read package.json to extract project dependencies
-    const packageJsonPath = join(rootCwd, 'package.json')
+    const packageJsonPath = join(config.root, 'package.json')
 
     let dependencies: string[] = []
     let devDependencies: string[] = []
@@ -61,7 +38,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
     // Construct glob pattern to find component directories: */*/*.{vue,js,jsx,ts,tsx}
     // This pattern matches the typical shadcn-vue structure: category/component-name/files
     const dirs = globSync(`*/*/*.{${VALID_EXTENSIONS}}`, {
-        cwd: absoluteCwd,
+        cwd: config.cwd,
         absolute: true,
         ignore: ['**/node_modules/**', '**/dist/**'],
     }).map(file => dirname(file))
@@ -70,7 +47,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
     const uniqueDirs = Array.from(new Set(dirs))
     // console.log(uniqueDirs)
     console.log(
-        blue(`Found ${red(uniqueDirs.length)} components in ${absoluteCwd}`),
+        blue(`Found ${red(uniqueDirs.length)} components in ${config.cwd}`),
     )
 
     const registryItems = []
@@ -84,7 +61,7 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
         })
 
         // Calculate relative path from the scanned directory to current component
-        const relativeDir = relative(absoluteCwd, dir)
+        const relativeDir = relative(config.cwd, dir)
 
         // Extract component metadata from directory structure
         // Category: first segment (e.g., 'ui', 'forms', 'layout')
@@ -144,8 +121,8 @@ export async function generateRegistry(cwd: string, output: string): Promise<voi
 
     const registryData = {
         $schema: 'https://shadcn-vue.com/schema/registry.json',
-        name: 'lonewolfyx',
-        homepage: 'https://github.com/lonewolfyx',
+        name: config.name,
+        homepage: config.homepage,
         items: registryItems,
     }
 

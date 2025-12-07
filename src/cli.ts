@@ -1,9 +1,12 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import * as process from 'node:process'
+import { red } from 'ansis'
 import { cac } from 'cac'
 import ora from 'ora'
+import { generateRegistry } from '@/commands/generate.ts'
+import { loadConfig, resolveConfig } from '@/utils/config.ts'
 import { version } from '../package.json'
-import { generateRegistry } from './commands/generate'
 
 const cli = cac('shadcn-vue-registry')
 
@@ -17,8 +20,25 @@ cli
     })
     .action(async (options) => {
         try {
+            // Load and display configuration before generation
+            console.log('🔧 Loading configuration...')
+            const config = await loadConfig()
+
+            if (!config.root) {
+                console.log(red('Error: Root path is not specified in the configuration.\n'))
+                return
+            }
+
+            const resolvedConfig = resolveConfig(config, options)
+
+            // Display resolved configuration
+            console.log('📋 Configuration resolved success')
+            // console.log(resolvedConfig)
+
             const spinner = ora('Generating registry\n\n').start()
-            await generateRegistry(options.cwd, options.output)
+
+            await generateRegistry(resolvedConfig)
+
             console.log('\n\n')
             spinner.succeed('🎉 Done, Registry generated successfully')
         }
