@@ -11,3 +11,12 @@ export interface RegistryConfig {
     output?: string
     registries?: IComponentsRegistry
 }
+
+export interface IGenerateOptions {
+    cwd: string
+    c: string
+    o: string
+    output: string
+}
+
+export type ResolveConfig = RegistryConfig & IGenerateOptions

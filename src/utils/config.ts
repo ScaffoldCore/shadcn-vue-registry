@@ -3,7 +3,7 @@
  */
 
 import type { Jiti } from 'jiti'
-import type { RegistryConfig } from '@/types'
+import type { IGenerateOptions, RegistryConfig, ResolveConfig } from '@/types'
 import { isAbsolute, resolve } from 'node:path'
 import * as process from 'node:process'
 import defu from 'defu'
@@ -39,7 +39,7 @@ export const loadConfig = async (): Promise<RegistryConfig> => {
     return defu(resolveConfig, defaultConfig)
 }
 
-export const resolveConfig = (config: RegistryConfig, options: { cwd: string, output: string }) => {
+export const resolveConfig = (config: RegistryConfig, options: IGenerateOptions): ResolveConfig => {
     const root = isAbsolute(config.root)
         ? config.root
         : resolve(process.cwd(), config.root)
