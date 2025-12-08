@@ -1,8 +1,9 @@
-import type { ResolveConfig } from '@/types'
+import type { IComponentsRegistry, ResolveConfig } from '@/types'
 import fs from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative, sep } from 'node:path'
 import { blue, red } from 'ansis'
+import { findUp } from 'find-up'
 import { globSync } from 'glob'
 import { VALID_EXTENSIONS } from '@/constant/comman.ts'
 import { getDependencies } from '@/utils/dependencies.ts'
@@ -79,6 +80,18 @@ export async function generateRegistry(config: ResolveConfig): Promise<void> {
     // Validate that the source directory exists before proceeding
     if (!fs.existsSync(config.cwd)) {
         throw new Error(`Directory not found: ${config.cwd}`)
+    }
+
+    const componentsPath = await findUp('components.json', {
+        cwd: config.cwd,
+    })
+
+    if (!componentsPath) {
+        throw new Error('components.json not found, skipping component discovery.')
+    }
+
+    const componentsJson = JSON.parse(await readFile(componentsPath, 'utf-8')) as {
+        registries?: IComponentsRegistry
     }
 
     /**
@@ -166,9 +179,7 @@ export async function generateRegistry(config: ResolveConfig): Promise<void> {
          * This categorizes imports as production, development, or registry dependencies
          */
         const pkgDependencies = getDependencies(dir, dependencies, devDependencies, {
-            thirdParty: {
-                '~/registry/ui': 'https://baidu.com/{name}.json',
-            },
+            thirdParty: componentsJson?.registries ?? {},
         })
 
         /**
