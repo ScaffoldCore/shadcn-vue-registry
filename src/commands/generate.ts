@@ -193,12 +193,12 @@ export async function generateRegistry(config: ResolveConfig): Promise<void> {
         }
         if (pkgDependencies.devDependencies.length) {
             Object.assign(items, {
-                dependencies: pkgDependencies.devDependencies,
+                devDependencies: pkgDependencies.devDependencies,
             })
         }
         if (pkgDependencies.registryDependencies.length) {
             Object.assign(items, {
-                dependencies: pkgDependencies.registryDependencies,
+                registryDependencies: pkgDependencies.registryDependencies,
             })
         }
 
