@@ -18,7 +18,7 @@ import { escapeRegExp, getPackageName } from '@/utils/utils.ts'
  * @param compiledDependencies - Array of production dependencies from package.json
  * @param compiledDevDependencies - Array of development dependencies from package.json
  * @param shadcnConfig - Optional configuration object for third-party registry mappings
- * @param shadcnConfig.thirdParty - Registry mapping configuration for third-party components
+ * @param shadcnConfig.registries - Registry mapping configuration for third-party components
  * @returns Object containing categorized dependencies, each as sorted arrays
  *
  * @example
@@ -28,7 +28,7 @@ import { escapeRegExp, getPackageName } from '@/utils/utils.ts'
  *   ['vue', '@vue/runtime-core'],
  *   ['typescript', 'vite'],
  *   {
- *     thirdParty: {
+ *     registries: {
  *       '~/registry/ui': 'https://registry.example.com/{name}.json',
  *     }
  *   }
@@ -40,7 +40,7 @@ export function getDependencies(
     compiledDependencies: string[],
     compiledDevDependencies: string[],
     shadcnConfig?: {
-        thirdParty?: IComponentsRegistry
+        registries?: IComponentsRegistry
     },
 ): IDependencies {
     // Scan for all valid component files in the directory
@@ -66,8 +66,8 @@ export function getDependencies(
     const IGNORE_UTILS_REGEX = /(?:^|\/)lib\/utils$/ // Ignores common utility imports
 
     // Preprocess third-party configuration for efficient matching
-    const thirdPartyConfig = shadcnConfig?.thirdParty ?? {}
-    const thirdPartyMatchers = Object.entries(thirdPartyConfig).map(([prefix, value]) => {
+    const registryConfig = shadcnConfig?.registries ?? {}
+    const registryMatchers = Object.entries(registryConfig).map(([prefix, value]) => {
         const normalizedPrefix = prefix.normalize('NFKC')
         const escapedPrefix = escapeRegExp(normalizedPrefix)
         const urlTemplate = typeof value === 'string' ? value : value.url
@@ -129,8 +129,8 @@ export function getDependencies(
             }
 
             // Check for third-party registry dependencies using configured matchers
-            let hitThirdParty = false
-            for (const item of thirdPartyMatchers) {
+            let hitRegistry = false
+            for (const item of registryMatchers) {
                 if (!item.regex.test(dep))
                     continue
 
@@ -147,12 +147,12 @@ export function getDependencies(
                 }
 
                 registryDependencies.add(url)
-                hitThirdParty = true
+                hitRegistry = true
                 break
             }
 
             // Skip to next dependency if third-party matching was successful
-            if (hitThirdParty)
+            if (hitRegistry)
                 continue
 
             // Default case: treat as registry dependency

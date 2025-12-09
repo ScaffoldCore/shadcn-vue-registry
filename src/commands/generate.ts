@@ -179,7 +179,7 @@ export async function generateRegistry(config: ResolveConfig): Promise<void> {
          * This categorizes imports as production, development, or registry dependencies
          */
         const pkgDependencies = getDependencies(dir, dependencies, devDependencies, {
-            thirdParty: componentsJson?.registries ?? {},
+            registries: componentsJson?.registries ?? {},
         })
 
         /**

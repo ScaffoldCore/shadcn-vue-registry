@@ -110,8 +110,9 @@ interface RegistryConfig {
     root: string // Path to components directory (required)
     name?: string // Project name (optional)
     homepage?: string // Project homepage (optional)
+    cwd?: string // Root directory (default: '.')
     output?: string // Output directory (default: '.')
-    thirdParty?: Record<string, string | { url: string, params?: Record<string, string> }>
+    registries?: Record<string, string | { url: string, params?: Record<string, string> }>
 }
 ```
 
@@ -125,7 +126,7 @@ export default defineConfig({
     name: 'My UI Components',
     homepage: 'https://my-ui-components.com',
     output: './registry',
-    thirdParty: {
+    registries: {
         '~/registry/ui': 'https://registry.example.com/{name}.json'
     }
 })
