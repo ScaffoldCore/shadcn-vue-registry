@@ -19,8 +19,8 @@
     "module": "dist/index.mjs",
     "types": "dist/index.d.mts",
     "bin": {
-        "svr": "./src/bin/index.js",
-        "shadcn-vue-registry": "./src/bin/index.js"
+        "svr": "src/bin/index.js",
+        "shadcn-vue-registry": "src/bin/index.js"
     },
     "files": [
         "dist"
