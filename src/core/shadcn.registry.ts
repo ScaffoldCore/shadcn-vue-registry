@@ -34,7 +34,7 @@ import { getRegistryType } from '@/utils/types.ts'
 export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRegistrySchema> => {
     // Locate the components.json configuration file by searching up from the working directory
     const componentsPath = await findUp('components.json', {
-        cwd: config.cwd,
+        cwd: config.root,
     })
 
     // Validate that components.json exists - it's required for shadcn-vue projects
