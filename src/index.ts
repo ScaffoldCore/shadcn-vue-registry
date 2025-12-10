@@ -1,5 +1,3 @@
-export * from './cli'
-export { generateShadcnRegistry } from './core/shadcn.registry'
-export {
-    defineConfig,
-} from './utils/config'
+export * from './core'
+export * from './types'
+export * from './utils'
