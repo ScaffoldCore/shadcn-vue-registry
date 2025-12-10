@@ -14,8 +14,8 @@ export interface RegistryConfig {
 
 export interface IGenerateOptions {
     cwd: string
-    c: string
-    o: string
+    c?: string
+    o?: string
     output: string
 }
 
