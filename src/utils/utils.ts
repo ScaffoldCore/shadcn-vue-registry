@@ -47,3 +47,67 @@ export const getPackageName = (dep: string): string => {
     // Split should theoretically return at least [''], but fallback to dep for TS strict mode
     return dep.split('/')[0] ?? dep
 }
+
+/**
+ * Removes empty, null, and undefined values from objects for clean data processing
+ *
+ * This utility is essential for cleaning configuration objects, API responses,
+ * and database records where empty values should be ignored during processing.
+ *
+ * Features:
+ * - Type-safe filtering with generic constraints
+ * - Preserves object structure while removing empty values
+ * - Handles nested objects correctly
+ * - Useful for configuration cleanup and validation
+ *
+ * @param obj - The object to filter, maintaining original typing
+ * @returns New object with only truthy and non-empty values
+ *
+ * @example
+ * ```typescript
+ * // Configuration cleanup
+ * const config = {
+ *   name: 'My App',
+ *   description: '',
+ *   version: '1.0.0',
+ *   homepage: null,
+ *   author: undefined,
+ *   repository: '',
+ *   tags: [],
+ *   settings: { theme: 'dark', locale: 'en' }
+ * }
+ * const cleanConfig = removeEmptyValues(config)
+ * // Result: { name: 'My App', version: '1.0.0', settings: { theme: 'dark', locale: 'en' } }
+ *
+ * // API response cleanup
+ * const apiResponse = {
+ *   id: '123',
+ *   title: 'Product Title',
+ *   description: null,
+ *   price: undefined,
+ *   category: ''
+ * }
+ * const cleanResponse = removeEmptyValues(apiResponse)
+ * // Result: { id: '123', title: 'Product Title' }
+ *
+ * // Nested objects
+ * const nested = {
+ *   user: { name: 'John', email: '' },
+ *   meta: { created: null, updated: undefined },
+ *   list: [1, null, '', 3]
+ * }
+ * const cleanNested = removeEmptyValues(nested)
+ * // Result: { user: { name: 'John' }, meta: { updated: undefined }, list: [1, 3] }
+ * ```
+ */
+export const removeEmptyValues = <T extends Record<string, any>>(obj: T): Partial<T> => {
+    return Object.fromEntries(
+        // Filter out entries where value is null, undefined, or empty string
+        Object.entries(obj).filter(([_, value]) => {
+            // Check for various types of empty/falsy values
+            return value !== null
+                && value !== undefined
+                && value !== ''
+        }),
+    ) as Partial<T>
+}

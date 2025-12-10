@@ -14,6 +14,7 @@ import defu from 'defu'
 import { findUp } from 'find-up'
 import { createJiti } from 'jiti'
 import { DEFAULT_CONFIG_FILES } from '@/constant/comman.ts'
+import { removeEmptyValues } from '@/utils/utils.ts'
 
 /**
  * Default configuration values used as fallbacks
@@ -162,7 +163,7 @@ export const resolveConfig = (config: RegistryConfig, options: IGenerateOptions)
      * defu ensures nested objects are properly merged
      * CLI options have higher priority than config file values
      */
-    const { cwd, output, ...resolveConfig } = defu(options, config)
+    const { cwd, output, ...resolveConfig } = defu({ ...removeEmptyValues(config) as ResolveConfig }, options)
 
     return {
         ...resolveConfig, // Spread merged configuration
