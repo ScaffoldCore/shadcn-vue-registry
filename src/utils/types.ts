@@ -1,4 +1,4 @@
-import type { RegistryType } from '@/constant/typeMap.ts'
+import type { registryItemTypeSchema } from '#/shadcn'
 import { sep } from 'node:path'
 import { REGISTRY_TYPES, typeMap } from '@/constant/typeMap.ts'
 
@@ -6,7 +6,7 @@ import { REGISTRY_TYPES, typeMap } from '@/constant/typeMap.ts'
  * Performance cache for storing resolved registry types.
  * Key: path string, Value: resolved registry type
  */
-const typeCache = new Map<string, RegistryType>()
+const typeCache = new Map<string, registryItemTypeSchema>()
 
 /**
  * Optimized list of common prefixes for early detection.
@@ -44,7 +44,7 @@ const COMMON_PREFIXES = ['ui', 'lib', 'component', 'components', 'page', 'pages'
  * - Subsequent calls: O(1) due to caching
  * - Cache size automatically managed to prevent memory leaks
  */
-export const getRegistryType = (path: string): RegistryType => {
+export const getRegistryType = (path: string): registryItemTypeSchema => {
     // Input validation - early return for edge cases
     if (!path || typeof path !== 'string') {
         return REGISTRY_TYPES.ITEM
@@ -82,7 +82,7 @@ export const getRegistryType = (path: string): RegistryType => {
  * @param segments - Array of path segments to search through
  * @returns Best matching registry type
  */
-function searchTypeInSegments(segments: string[]): RegistryType {
+function searchTypeInSegments(segments: string[]): registryItemTypeSchema {
     // Optimization 1: Check common segments in reverse order for faster matches
     for (let i = segments.length - 1; i >= 0; i--) {
         const segment = segments[i]
@@ -109,7 +109,7 @@ function searchTypeInSegments(segments: string[]): RegistryType {
         return typeMap[fallback]!
     }
 
-    return `registry:${fallback}` as RegistryType
+    return `registry:${fallback}` as registryItemTypeSchema
 }
 
 /**
