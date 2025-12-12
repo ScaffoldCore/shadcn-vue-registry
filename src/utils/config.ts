@@ -26,6 +26,10 @@ export const defaultConfig: RegistryConfig = {
     root: process.cwd(),
     name: '',
     homepage: '',
+    scanPatterns: {
+        componentPattern: '*/*/*', // Default component directory pattern
+        filePattern: '**/*', // Default file scan pattern within components
+    },
 }
 
 /**

@@ -67,9 +67,13 @@ export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRe
         }
     }
 
-    // Scan for component files using glob pattern matching shadcn-vue structure
-    // Pattern: */*/*.{vue,js,jsx,ts,tsx} matches the typical shadcn-vue component structure (category/component/files)
-    const dirs = globSync(`*/*/*.{${VALID_EXTENSIONS}}`, {
+    // Get scan patterns from configuration or use defaults
+    const componentPattern = config.scanPatterns?.componentPattern ?? '*/*/*'
+    const filePattern = config.scanPatterns?.filePattern ?? '**/*'
+
+    // Scan for component directories using configurable glob pattern
+    // Pattern matches component directories based on user configuration
+    const dirs = globSync(`${componentPattern}.{${VALID_EXTENSIONS}}`, {
         cwd: config.cwd,
         absolute: true,
         ignore: ['**/node_modules/**', '**/dist/**'], // Exclude common build/dependency directories
@@ -88,8 +92,8 @@ export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRe
 
     // Process each unique component directory to build registry entries
     for (const dir of uniqueDirs) {
-        // Find all valid files within the component directory
-        const files = globSync(`**/*.{${VALID_EXTENSIONS}}`, {
+        // Find all valid files within the component directory using configurable pattern
+        const files = globSync(`${filePattern}.{${VALID_EXTENSIONS}}`, {
             cwd: dir,
             absolute: true,
         })

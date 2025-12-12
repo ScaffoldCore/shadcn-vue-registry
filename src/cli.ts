@@ -67,9 +67,11 @@ cli
 import { defineConfig } from 'shadcn-vue-registry'
 
 export default defineConfig({
-    root: '',
-    name: '',
-    homepage: '',
+    root: '',                    // Project root directory
+    name: '',                    // Project name for registry metadata
+    homepage: '',                // Project homepage for registry metadata
+    output: './registry',        // Output directory for registry.json
+    cwd: './src/components',     // Directory to scan for components
 })
 `
 

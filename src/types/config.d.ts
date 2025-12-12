@@ -10,6 +10,12 @@ export interface RegistryConfig {
     cwd?: string
     output?: string
     registries?: IComponentsRegistry
+    scanPatterns?: {
+        /** Component discovery pattern for finding component directories */
+        componentPattern?: string
+        /** File discovery pattern for scanning files within components */
+        filePattern?: string
+    }
 }
 
 export interface IGenerateOptions {
