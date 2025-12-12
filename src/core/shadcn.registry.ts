@@ -2,7 +2,7 @@ import type { IRegistryItemFileSchema, IRegistryItemsSchema, IRegistrySchema } f
 import type { IComponentsRegistry, ResolveConfig } from '@/types'
 import fs from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { dirname, join, relative, sep } from 'node:path'
+import { basename, dirname, join, relative } from 'node:path'
 import { blue, red } from 'ansis'
 import { findUp } from 'find-up'
 import { globSync } from 'glob'
@@ -71,13 +71,48 @@ export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRe
     const componentPattern = config.scanPatterns?.componentPattern ?? '*/*/*'
     const filePattern = config.scanPatterns?.filePattern ?? '**/*'
 
-    // Scan for component directories using configurable glob pattern
-    // Pattern matches component directories based on user configuration
-    const dirs = globSync(`${componentPattern}.{${VALID_EXTENSIONS}}`, {
+    // Scan for component files using configurable glob pattern
+    const componentFiles = globSync(`${componentPattern}.{${VALID_EXTENSIONS}}`, {
         cwd: config.cwd,
         absolute: true,
         ignore: ['**/node_modules/**', '**/dist/**'], // Exclude common build/dependency directories
-    }).map(file => dirname(file)) // Extract directory paths from file paths
+    })
+
+    // Helper function to determine if this is a single-file component based on pattern
+    // For patterns with 1 slash like '*/*', use filename as component name
+    // For patterns with 2+ slashes like '*/*/*', use directory name as component name
+    const getComponentName = (dir: string, filesInDir: string[], pattern: string): string => {
+        const slashCount = (pattern.match(/\//g) || []).length
+
+        if (slashCount === 1) {
+            // Pattern like '*/*' - use filename as component name
+            const firstFile = filesInDir[0]
+            if (!firstFile) {
+                return basename(dir)
+            }
+            const fileName = basename(firstFile)
+            return fileName.includes('.')
+                ? fileName.slice(0, fileName.lastIndexOf('.'))
+                : fileName
+        }
+        else {
+            // Pattern like '*/*/*' - use directory name as component name
+            return basename(dir)
+        }
+    }
+
+    // Group files by their directory to identify component directories
+    const dirToFilesMap = new Map<string, string[]>()
+    for (const file of componentFiles) {
+        const dir = dirname(file)
+        if (!dirToFilesMap.has(dir)) {
+            dirToFilesMap.set(dir, [])
+        }
+        dirToFilesMap.get(dir)!.push(file)
+    }
+
+    // Extract all component directories
+    const dirs = Array.from(dirToFilesMap.keys())
 
     // Remove duplicate directories to ensure each component is processed once
     const uniqueDirs = Array.from(new Set(dirs))
@@ -91,7 +126,7 @@ export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRe
     const registryItems: IRegistryItemsSchema[] = []
 
     // Process each unique component directory to build registry entries
-    for (const dir of uniqueDirs) {
+    for (const dir of dirs) {
         // Find all valid files within the component directory using configurable pattern
         const files = globSync(`${filePattern}.{${VALID_EXTENSIONS}}`, {
             cwd: dir,
@@ -101,8 +136,9 @@ export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRe
         // Get the relative path from the working directory for categorization
         const relativeDir = relative(config.cwd, dir)
 
-        // Extract component name (last path segment)
-        const name = relativeDir.split(sep).pop()!
+        // Extract component name based on pattern slash count
+        const filesInDir = dirToFilesMap.get(dir) || []
+        const name = getComponentName(dir, filesInDir, componentPattern)
 
         // Determine the registry type based on the directory structure
         const type = getRegistryType(relativeDir)
