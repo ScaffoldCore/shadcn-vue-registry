@@ -11,8 +11,9 @@ import { escapeRegExp, getPackageName } from '@/utils/utils.ts'
  * This function performs comprehensive dependency analysis by:
  * 1. Scanning all valid files in the specified directory
  * 2. Extracting import statements using regex patterns
- * 3. Categorizing dependencies into production, development, and registry dependencies
+ * 3. Categorizing dependencies while excluding those already in package.json
  * 4. Handling third-party registry mappings with URL templates
+ * 5. Recognizing common third-party libraries that might be missing from package.json
  *
  * @param dir - Directory path to scan for dependency analysis
  * @param compiledDependencies - Array of production dependencies from package.json
@@ -53,6 +54,16 @@ export function getDependencies(
     // Convert dependency arrays to Sets for efficient lookup
     const depSet = new Set(compiledDependencies)
     const devDepSet = new Set(compiledDevDependencies)
+
+    // Third-party libraries that might be used at runtime but could be missing from package.json
+    // Note: Core libraries like 'vue' should always be in package.json dependencies
+    const knownThirdPartyLibs = [
+        'vue-router',
+        'pinia',
+        'vue',
+        'unplugin-vue-components',
+        'unplugin-auto-import',
+    ]
 
     // Initialize Sets to store categorized dependencies
     const dependencies = new Set<string>()
@@ -108,6 +119,11 @@ export function getDependencies(
 
             // Extract package name for dependency matching
             const pkgName = getPackageName(dep)
+
+            // Skip known third-party libraries that are likely to be used at runtime
+            if (knownThirdPartyLibs.includes(pkgName)) {
+                continue
+            }
 
             // Categorize as production dependency if found in package.json dependencies
             if (depSet.has(pkgName)) {
