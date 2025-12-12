@@ -1,7 +1,7 @@
 {
     "name": "shadcn-vue-registry",
     "type": "module",
-    "version": "0.0.0-beta.7",
+    "version": "0.0.0-beta.8",
     "description": "A powerful CLI tool for automatically generating registry.json files for shadcn-vue component libraries",
     "author": "lonewolfyx <olddrivero.king@qq.com>",
     "license": "MIT",
