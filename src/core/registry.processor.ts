@@ -1,11 +1,11 @@
 import type { IRegistryItemFileSchema, IRegistryItemsSchema } from '#/shadcn'
 import type { IComponentsRegistry } from '@/types'
-import { join, relative } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { globSync } from 'glob'
-import { VALID_EXTENSIONS } from '@/constant/comman.ts'
-import { getDependencies } from '@/utils/dependencies.ts'
-import { getRegistryType } from '@/utils/types.ts'
-import { getComponentName } from './registry.name'
+import { VALID_EXTENSIONS } from '@/constant/comman'
+import { getComponentName } from '@/core/registry.name'
+import { getDependencies } from '@/utils/dependencies'
+import { getRegistryType } from '@/utils/types'
 
 /**
  * Configuration for processing individual components
@@ -49,19 +49,27 @@ export const processComponent = (
     dir: string,
     filesInDir: string[],
     config: ProcessComponentConfig,
+    precomputedName?: string,
 ): IRegistryItemsSchema => {
-    // Find all valid files within the component directory using configurable pattern
-    const filePattern = config.filePattern ?? '**/*'
-    const files = globSync(`${filePattern}.{${VALID_EXTENSIONS}}`, {
-        cwd: dir,
-        absolute: true,
-    })
+    // For file-based components, the dir is actually the file path
+    // Extract the actual directory for path calculations
+    const isFileBased = filesInDir.length === 1 && filesInDir[0] === dir
+    const actualDir = isFileBased ? dirname(dir) : dir
+
+    // For file-based components, use only the provided files
+    // For directory-based components, scan for all files
+    const files = isFileBased
+        ? filesInDir
+        : globSync(`${(config.filePattern ?? '**/*')}.{${VALID_EXTENSIONS}}`, {
+                cwd: actualDir,
+                absolute: true,
+            })
 
     // Get the relative path from the working directory for categorization
-    const relativeDir = relative(config.cwd, dir)
+    const relativeDir = relative(config.cwd, actualDir)
 
-    // Extract component name using smart naming logic
-    const name = getComponentName(dir, filesInDir)
+    // Use precomputed name if provided, otherwise extract component name using smart naming logic
+    const name = precomputedName || getComponentName(dir, filesInDir)
 
     // Determine the registry type based on the directory structure
     const type = getRegistryType(relativeDir)
@@ -71,7 +79,7 @@ export const processComponent = (
         name,
         type,
         files: files.map((file) => {
-            const relativeFile = relative(dir, file)
+            const relativeFile = relative(actualDir, file)
             const relativeFilePath = join(relativeDir, relativeFile)
             return {
                 path: relativeFilePath,
@@ -81,7 +89,7 @@ export const processComponent = (
     }
 
     // Analyze and extract dependencies for the current component
-    const pkgDependencies = getDependencies(dir, config.dependencies, config.devDependencies, {
+    const pkgDependencies = getDependencies(actualDir, config.dependencies, config.devDependencies, {
         registries: config.registries,
     })
 

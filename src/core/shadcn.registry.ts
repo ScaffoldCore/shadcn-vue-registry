@@ -1,9 +1,11 @@
 import type { IRegistrySchema } from '#/shadcn'
+import type { ComponentEntry } from '@/core/registry.discovery.ts'
 import type { ResolveConfig } from '@/types'
 import { blue, red } from 'ansis'
-import { loadProjectConfig } from './registry.config'
-import { discoverComponents } from './registry.discovery'
-import { processComponent } from './registry.processor'
+import { loadProjectConfig } from '@/core/registry.config.ts'
+import { discoverComponents } from '@/core/registry.discovery.ts'
+import { getComponentName } from '@/core/registry.name.ts'
+import { processComponent } from '@/core/registry.processor.ts'
 
 /**
  * Generates a complete shadcn-vue registry schema by scanning components and dependencies.
@@ -30,27 +32,34 @@ export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRe
     const { componentsJson, dependencies, devDependencies } = await loadProjectConfig(config.root)
 
     // 2. Discover component files and group them by directory
-    const { uniqueDirs, dirToFilesMap } = discoverComponents(config)
+    const { componentEntries } = discoverComponents(config)
 
     // Log the discovery progress for user feedback
     console.log(
-        blue(`Found ${red(uniqueDirs.length)} components in ${config.cwd}`),
+        blue(`Found ${red(componentEntries.length)} components in ${config.cwd}`),
     )
 
-    // 3. Process each component directory to build registry entries
+    // 3. Process each component entry to build registry entries
     const registryItems = await Promise.all(
-        uniqueDirs.map((dir: string) =>
-            processComponent(
-                dir,
-                dirToFilesMap.get(dir) || [],
+        componentEntries.map((entry: ComponentEntry) => {
+            const { dir, files, isFileBased } = entry
+
+            // For file-based components, use file path instead of directory
+            const componentDir = isFileBased ? files[0]! : dir
+            const name = getComponentName(dir, files, isFileBased)
+
+            return processComponent(
+                componentDir,
+                files,
                 {
                     cwd: config.cwd,
                     dependencies,
                     devDependencies,
                     registries: componentsJson?.registries ?? {},
                 },
-            ),
-        ),
+                name,
+            )
+        }),
     )
 
     // 4. Return the complete registry schema

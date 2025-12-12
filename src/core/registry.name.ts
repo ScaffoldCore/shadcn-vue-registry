@@ -23,11 +23,25 @@ import { basename } from 'node:path'
  * // Returns: 'OpenV0Link'
  * ```
  */
-export const getComponentName = (dir: string, filesInDir: string[]): string => {
+export const getComponentName = (dir: string, filesInDir: string[], isFileBased = false): string => {
     if (filesInDir.length === 0) {
         return basename(dir)
     }
 
+    // File-based component: use filename as component name
+    if (isFileBased && filesInDir.length === 1) {
+        const singleFile = filesInDir[0]
+        if (!singleFile) {
+            return basename(dir)
+        }
+        const fileName = basename(singleFile)
+        const nameWithoutExt = fileName.includes('.')
+            ? fileName.slice(0, fileName.lastIndexOf('.'))
+            : fileName
+        return nameWithoutExt
+    }
+
+    // Directory-based component logic
     // Check if there's an index file (index.vue, index.ts, etc.)
     const hasIndexFile = filesInDir.some((file) => {
         const fileName = basename(file)

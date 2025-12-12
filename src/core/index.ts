@@ -1,1 +1,5 @@
+export * from './registry.config'
+export * from './registry.discovery'
+export * from './registry.name'
+export * from './registry.processor'
 export * from './shadcn.registry'
