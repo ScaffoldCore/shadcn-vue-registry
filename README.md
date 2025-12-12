@@ -1,4 +1,8 @@
-# shadcn-vue-registry
+<p align="center">
+    <img src="/public/logo.svg" alt="shadcn-vue-registry" width="350" height="350"/>
+</p>
+
+<h1 align="center">shadcn-vue-registry</h1>
 
 > 🚀 A powerful CLI tool for automatically generating `registry.json` files for shadcn-vue components
 ---
