@@ -1,4 +1,4 @@
-import type { IComponentsRegistry } from '@/types'
+import type { IComponentsRegistry, ResolveConfig } from '@/types'
 import fs from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -6,16 +6,21 @@ import { findUp } from 'find-up'
 
 /**
  * Loads project configuration including components.json and package.json dependencies
+ * Merges manual dependencies from config with package.json dependencies
  *
  * @param root - The root directory of the project
+ * @param config - Additional configuration with manual dependencies
  * @returns Promise containing components registry and dependency information
  *
  * @example
  * ```typescript
- * const { componentsJson, dependencies, devDependencies } = await loadProjectConfig('/project')
+ * const { componentsJson, dependencies, devDependencies } = await loadProjectConfig('/project', {
+ *   dependencies: ['vue', 'element-plus'],
+ *   devDependencies: ['vite', 'typescript']
+ * })
  * ```
  */
-export const loadProjectConfig = async (root: string) => {
+export const loadProjectConfig = async (root: string, config?: Pick<ResolveConfig, 'dependencies' | 'devDependencies'>) => {
     // Locate the components.json configuration file by searching up from the working directory
     const componentsPath = await findUp('components.json', {
         cwd: root,
@@ -51,10 +56,20 @@ export const loadProjectConfig = async (root: string) => {
         }
     }
 
+    // Merge with manual dependencies from config (if provided)
+    // Manual dependencies take priority and are merged with package.json dependencies
+    const mergedDependencies = config?.dependencies
+        ? Array.from(new Set([...config.dependencies, ...dependencies]))
+        : dependencies
+
+    const mergedDevDependencies = config?.devDependencies
+        ? Array.from(new Set([...config.devDependencies, ...devDependencies]))
+        : devDependencies
+
     return {
         componentsJson,
-        dependencies,
-        devDependencies,
+        dependencies: mergedDependencies,
+        devDependencies: mergedDevDependencies,
     }
 }
 

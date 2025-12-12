@@ -29,7 +29,10 @@ import { processComponent } from '@/core/registry.processor.ts'
  */
 export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRegistrySchema> => {
     // 1. Load project configuration (components.json and package.json dependencies)
-    const { componentsJson, dependencies, devDependencies } = await loadProjectConfig(config.root)
+    const { componentsJson, dependencies, devDependencies } = await loadProjectConfig(config.root, {
+        dependencies: config.dependencies,
+        devDependencies: config.devDependencies,
+    })
 
     // 2. Discover component files and group them by directory
     const { componentEntries } = discoverComponents(config)

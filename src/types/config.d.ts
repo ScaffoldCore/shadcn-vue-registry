@@ -10,6 +10,10 @@ export interface RegistryConfig {
     cwd?: string
     output?: string
     registries?: IComponentsRegistry
+    /** Manual dependency management for production dependencies */
+    dependencies?: string[]
+    /** Manual dependency management for development dependencies */
+    devDependencies?: string[]
     scanPatterns?: {
         /** Component discovery pattern for finding component directories */
         componentPattern?: string

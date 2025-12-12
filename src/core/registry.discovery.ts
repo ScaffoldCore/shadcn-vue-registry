@@ -18,7 +18,7 @@ export interface ComponentScanConfig extends Pick<ResolveConfig, 'cwd' | 'scanPa
  * Determines if files in a directory should be treated as separate components
  * rather than a single multi-file component
  */
-const shouldSplitIntoSeparateComponents = (files: string[], dir: string): boolean => {
+const shouldSplitIntoSeparateComponents = (files: string[]): boolean => {
     // Always split if there are no index files
     const hasIndexFile = files.some(file => basename(file).startsWith('index.'))
     if (!hasIndexFile) {
@@ -57,7 +57,7 @@ export const discoverComponents = (config: ComponentScanConfig) => {
     }> = []
 
     for (const [dir, files] of dirToFilesMap) {
-        if (shouldSplitIntoSeparateComponents(files, dir)) {
+        if (shouldSplitIntoSeparateComponents(files)) {
             // Treat each file as a separate component
             for (const file of files) {
                 componentEntries.push({
