@@ -43,13 +43,19 @@ export function getDependencies(
     shadcnConfig?: {
         registries?: IComponentsRegistry
     },
+    options?: {
+        /** Specific files to analyze instead of scanning directory */
+        files?: string[]
+    },
 ): IDependencies {
-    // Scan for all valid component files in the directory
-    const files = globSync(`**/*.{${VALID_EXTENSIONS}}`, {
-        cwd: dir,
-        absolute: true,
-        ignore: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
-    })
+    // Use provided files or scan for all valid component files in the directory
+    const files = options?.files
+        ? options.files.filter(file => file.endsWith('.vue') || file.endsWith('.ts') || file.endsWith('.js'))
+        : globSync(`**/*.{${VALID_EXTENSIONS}}`, {
+                cwd: dir,
+                absolute: true,
+                ignore: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
+            })
 
     // Convert dependency arrays to Sets for efficient lookup
     const depSet = new Set(compiledDependencies)
@@ -172,6 +178,19 @@ export function getDependencies(
                 continue
 
             // Default case: treat as registry dependency
+            // For internal component dependencies (like @/registry/components/card),
+            // extract only the component name
+            if (dep.startsWith('@/registry/')) {
+                const parts = dep.split('/')
+                if (parts.length >= 3) {
+                    // Extract component name from path like @/registry/components/card -> card
+                    const componentName = parts[parts.length - 1]
+                    if (componentName && componentName !== '') {
+                        registryDependencies.add(componentName)
+                        continue
+                    }
+                }
+            }
             registryDependencies.add(dep)
         }
     }

@@ -89,8 +89,12 @@ export const processComponent = (
     }
 
     // Analyze and extract dependencies for the current component
+    // For file-based components, analyze only the specific file(s)
+    // For directory-based components, scan the entire directory
     const pkgDependencies = getDependencies(actualDir, config.dependencies, config.devDependencies, {
         registries: config.registries,
+    }, {
+        files: isFileBased ? files : undefined,
     })
 
     // Attach production dependencies if any are found
