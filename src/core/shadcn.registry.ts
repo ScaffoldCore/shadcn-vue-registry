@@ -59,6 +59,7 @@ export const generateShadcnRegistry = async (config: ResolveConfig): Promise<IRe
                     dependencies,
                     devDependencies,
                     registries: componentsJson?.registries ?? {},
+                    filePattern: config.scanPatterns?.filePattern,
                 },
                 name,
             )

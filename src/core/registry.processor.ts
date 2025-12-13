@@ -95,6 +95,7 @@ export const processComponent = (
         registries: config.registries,
     }, {
         files: isFileBased ? files : undefined,
+        filePattern: Array.isArray(config.filePattern) ? config.filePattern[0] : config.filePattern,
     })
 
     // Attach production dependencies if any are found

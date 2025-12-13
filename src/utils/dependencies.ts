@@ -46,12 +46,14 @@ export function getDependencies(
     options?: {
         /** Specific files to analyze instead of scanning directory */
         files?: string[]
+        /** File discovery pattern for scanning files within components */
+        filePattern?: string
     },
 ): IDependencies {
     // Use provided files or scan for all valid component files in the directory
     const files = options?.files
         ? options.files.filter(file => file.endsWith('.vue') || file.endsWith('.ts') || file.endsWith('.js'))
-        : globSync(`**/*.{${VALID_EXTENSIONS}}`, {
+        : globSync(`${(options?.filePattern ?? '**/*')}.{${VALID_EXTENSIONS}}`, {
                 cwd: dir,
                 absolute: true,
                 ignore: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
