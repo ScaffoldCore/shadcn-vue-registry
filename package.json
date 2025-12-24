@@ -29,7 +29,8 @@
         "dev": "tsdown --watch",
         "build": "tsdown",
         "lint": "eslint",
-        "lint:fix": "eslint --fix"
+        "lint:fix": "eslint --fix",
+        "prepublishOnly": "pnpm build"
     },
     "publishConfig": {
         "registry": "https://registry.npmjs.org",
