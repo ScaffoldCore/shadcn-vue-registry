@@ -98,13 +98,14 @@ export const loadConfig = async (): Promise<RegistryConfig> => {
      */
     const loader: Jiti = createJiti(process.cwd(), {
         extensions: ['.js', '.ts', '.mjs', '.cjs', '.mts', '.cts'],
+        moduleCache: false,
     })
 
     /**
      * Import configuration file with cache busting
      * The timestamp prevents Node.js from caching the module during development
      */
-    const resolveConfig: RegistryConfig = await loader.import(`${resolveConfigPath}?t=${Date.now()}`, {
+    const resolveConfig: RegistryConfig = await loader.import(`${resolveConfigPath}`, {
         default: true,
     })
 
